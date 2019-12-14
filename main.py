@@ -13,7 +13,9 @@ def getNgrokHost():
     db = boto3.resource('dynamodb')
     t = db.Table('MY_HOST')
     res = t.query(
-        KeyConditionExpression=Key('NAME').eq('ngrok')
+        KeyConditionExpression=Key('NAME').eq('ngrok'),
+        ScanIndexForward= False,
+        Limit= 1
     )
     ngrok_url = res['Items'][0]['HOST']
     print('getNgrokHost: ngrok_url=', ngrok_url)
@@ -33,8 +35,8 @@ def main_handler(event, context):
         print('event is None. use Deafault message', message)
     else:
         print('event has message, decoding received event')
-        print('event[text]', event['text'])
-        message = event['text']
+        print('event[body]', json.loads(event['body']))
+        message = json.loads(event['body'])['text']
 
     print('POST notify message to ' + homeurl + apipath)
     print('message', message)
@@ -54,7 +56,7 @@ def main_handler(event, context):
 
     return {
         'statusCode': 200,
-        'body': json.dumps('Hello from Lambda!')
+        'body': json.dumps('Message Sended to ngrok(google home)')
     }
 
 
@@ -67,7 +69,11 @@ if __name__ == '__main__':
     if len(args) > 1:
         #第一引数: しゃべらせたいメッセージ
         print('args have message', args[1])
-        message = {'text': args[1]}
+        message = {
+            'body':{
+                'text': args[1]
+                }
+        }
         event = message
     else:
         print('no args inputed. -> use default message')

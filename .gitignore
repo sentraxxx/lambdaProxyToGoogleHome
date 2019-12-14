@@ -113,6 +113,7 @@ venv.bak/
 .vscode/
 .zip
 *.code-workspace
+template/
 
 # Spyder project settings
 .spyderproject
